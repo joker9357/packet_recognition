@@ -1,29 +1,10 @@
 import copy
 import os
-
 import pyshark
 
-from Packet import Packet
-
-def load_data(path):
-    classes = []
-    for file in os.listdir(path):
-        if os.path.isdir(path + '/' + file):
-            classes.append(file)
-    return classes
+from packet_recognition.Packet import Packet
 
 
-def getClass(train):
-    classes = []
-    for file in os.listdir(train):
-        if os.path.isdir(train + '/' + file):
-            classes.append(file)
-    return classes
-
-def main():
-    cap = pyshark.FileCapture('1.cap')
-    listburst = get_burst(cap)
-    print("Total length of ip is "+str(sum))
 
 
 def append_burst(target, element):
@@ -85,11 +66,34 @@ def get_burst(cap):
     list_bi_burst.append(list_bi_packet)
     list_up_burst.append(list_up_packet)
     list_down_burst.append(list_down_packet)
-
     return list_up_burst, list_down_burst, list_bi_burst
 
 
+def get_data(list_burst):
+    for burst in list_burst:
+        for list in burst:
+            for i in range(len(list)):
+                list[i] = list[i].len
 
+
+def load_data(path):
+    list_res = []
+    for file in os.listdir(path):
+        try:
+            cap = pyshark.FileCapture(file)
+            listburst = get_burst(cap)
+        except:
+            print("not a file")
+        get_data(listburst)
+        list_res.append(listburst)
+    return list_res
+
+def main():
+    list_social = load_data('social')
+    list_finance = load_data('finance')
+    list_communication = load_data('communication')
+
+    print("Total length of ip is "+str(sum))
 
 
 if __name__=='__main__': main()
