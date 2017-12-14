@@ -6,7 +6,7 @@ from packet_recognition import Packet
 
 
 def main():
-    cap = pyshark.FileCapture('1.cap')
+    cap = pyshark.FileCapture('./packet_recognition/1.cap')
     sum=0
     time = 0
     list_packet = []
