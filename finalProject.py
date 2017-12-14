@@ -7,10 +7,23 @@ from Packet import Packet
 
 def main():
     cap = pyshark.FileCapture('1.cap')
-
     listburst = get_burst(cap)
-
     print("Total length of ip is "+str(sum))
+
+
+def append_burst(target, element):
+    list = copy.copy(element)
+    target.append(list)
+    element.clear()
+
+
+def append_packet(up_list, down_list, bi_list, packet):
+    bi_list.append(packet)
+    if packet.len > 0:
+        up_list.append(packet)
+    else:
+        down_list.append(packet)
+
 
 def get_burst(cap):
     sum = 0
@@ -42,31 +55,16 @@ def get_burst(cap):
             print(tmp_time)
             # print(tmp_time)
             # start a new burst
-            if  tmp_time - time > 0.1:
+            if tmp_time - time > 0.1:
                 # copy and append the previous burst
-                li_bi = copy.copy(list_bi_packet)
-                li_up = copy.copy(list_up_packet)
-                li_down = copy.copy(list_down_packet)
-                list_bi_burst.append(li_bi)
-                list_up_burst.append(li_up)
-                list_down_burst.append(li_down)
-                # start new burst
-                list_bi_packet = []
-                list_up_packet = []
-                list_down_packet = []
-                list_bi_packet.append(packet)
-                if packet.len > 0:
-                    list_up_packet.append(packet)
-                else:
-                    list_down_packet.append(packet)
+                append_burst(list_up_burst,list_up_packet)
+                append_burst(list_down_burst, list_down_packet)
+                append_burst(list_bi_burst, list_bi_packet)
+                append_packet(list_up_packet, list_down_packet, list_bi_packet, packet)
                 print("time: " + str(time))
             #     append the existing burst
             else:
-                list_bi_packet.append(packet)
-                if packet.len > 0:
-                    list_up_packet.append(packet)
-                else:
-                    list_down_packet.append(packet)
+                append_packet(list_up_packet, list_down_packet, list_bi_packet, packet)
             time = tmp_time
         idx += 1
     list_bi_burst.append(list_bi_packet)
@@ -74,6 +72,9 @@ def get_burst(cap):
     list_down_burst.append(list_down_packet)
 
     return list_up_burst, list_down_burst, list_bi_burst
+
+
+
 
 
 if __name__=='__main__': main()
