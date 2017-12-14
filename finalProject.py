@@ -1,8 +1,9 @@
 import copy
 import os
 import pyshark
+from test import changetovector
 
-from packet_recognition.Packet import Packet
+from Packet import Packet
 
 
 
@@ -27,9 +28,8 @@ def get_burst(cap):
     list_up_packet = []
     list_down_packet = []
     list_bi_packet = []
-    list_up_burst = []
-    list_down_burst = []
-    list_bi_burst = []
+    list = []
+    list_burst = []
     idx = 0
     for _ in cap:
         # parse the packet
@@ -53,9 +53,11 @@ def get_burst(cap):
             # start a new burst
             if tmp_time - time > 0.1:
                 # copy and append the previous burst
-                append_burst(list_up_burst,list_up_packet)
-                append_burst(list_down_burst, list_down_packet)
-                append_burst(list_bi_burst, list_bi_packet)
+                append_burst(list,list_up_packet)
+                append_burst(list, list_down_packet)
+                append_burst(list, list_bi_packet)
+                list_burst.append(list)
+                list = []
                 append_packet(list_up_packet, list_down_packet, list_bi_packet, packet)
                 print("time: " + str(time))
             #     append the existing burst
@@ -63,10 +65,11 @@ def get_burst(cap):
                 append_packet(list_up_packet, list_down_packet, list_bi_packet, packet)
             time = tmp_time
         idx += 1
-    list_bi_burst.append(list_bi_packet)
-    list_up_burst.append(list_up_packet)
-    list_down_burst.append(list_down_packet)
-    return list_up_burst, list_down_burst, list_bi_burst
+    append_burst(list, list_up_packet)
+    append_burst(list, list_down_packet)
+    append_burst(list, list_bi_packet)
+    list_burst.append(list)
+    return list_burst
 
 
 def get_data(list_burst):
@@ -78,21 +81,24 @@ def get_data(list_burst):
 
 def load_data(path):
     list_res = []
+    listburst=[]
     for file in os.listdir(path):
         try:
-            cap = pyshark.FileCapture(file)
+            cap = pyshark.FileCapture(path + file)
             listburst = get_burst(cap)
         except:
             print("not a file")
         get_data(listburst)
-        list_res.append(listburst)
+        list_res.extend(listburst)
     return list_res
 
 def main():
-    list_social = load_data('social')
-    list_finance = load_data('finance')
-    list_communication = load_data('communication')
-
+    list_social = load_data('social/')
+    # list_finance = load_data('finance')
+    # list_communication = load_data('communication')
+    feature = []
+    for tmp_res in list_social:
+        feature.append(changetovector(tmp_res))
     print("Total length of ip is "+str(sum))
 
 
