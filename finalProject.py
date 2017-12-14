@@ -4,6 +4,16 @@ import pyshark
 
 from Packet import Packet
 
+def load_data(path):
+
+
+
+def getClass(train):
+    classes = []
+    for file in os.listdir(train):
+        if os.path.isdir(train + '/' + file):
+            classes.append(file)
+    return classes
 
 def main():
     cap = pyshark.FileCapture('1.cap')
