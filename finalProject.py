@@ -2,7 +2,7 @@ import copy
 
 import pyshark
 
-from packet_recognition import Packet
+from packet_recognition.Packet import Packet
 
 
 def main():
@@ -18,11 +18,14 @@ def main():
         length = float(_.captured_length)
         dst = str(_.layers[1].dst)
         src = str(_.layers[1].src)
-        packet = Packet.Packet(src, dst, length)
         if idx == 0:
             time = float(_.sniff_timestamp)
+            Packet.source = src
+            Packet.destination = dst
+            packet = Packet(src, dst, length)
             list_packet.append(packet)
         else:
+            packet = Packet(src, dst, length)
             tmp_time = float(_.sniff_timestamp)
             if  tmp_time - time > 1:
                 li = copy.copy(list_packet)
