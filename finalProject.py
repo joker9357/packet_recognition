@@ -92,13 +92,21 @@ def load_data(path):
         list_res.extend(listburst)
     return list_res
 
+def get_labeled_feature(data, label):
+    feature = []
+    for tmp_res in data:
+        tmp = changetovector(tmp_res)
+        tmp.append(label)
+        feature.append(tmp)
+    return feature
+
 def main():
     list_social = load_data('social/')
     # list_finance = load_data('finance')
     # list_communication = load_data('communication')
-    feature = []
-    for tmp_res in list_social:
-        feature.append(changetovector(tmp_res))
+
+    social_data = get_labeled_feature(list_social,'social')
+
     print("Total length of ip is "+str(sum))
 
 

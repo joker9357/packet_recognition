@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 
 # data = [[2, 3, 4, 6],[2, 3, 4, 5, 6],[2, -2, 4, -6]]
 
@@ -17,6 +18,10 @@ def changetovector(data):
         datalist.append(kurtosis)
 
         result.extend(datalist)
+    for i in range(len(result)):
+        if math.isnan(result[i]):
+            result[i] = 0
+
     return result
 
 # res = changetovector(data)
