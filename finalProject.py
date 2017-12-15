@@ -1,7 +1,7 @@
 import copy
 import os
 import pyshark
-from test import changetovector
+from Vectorization import changetovector
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -66,7 +66,7 @@ def get_burst(cap):
         else:
             packet = Packet(src, dst, length)
             tmp_time = float(_.sniff_timestamp)
-            print(tmp_time)
+
             # print(tmp_time)
             # start a new burst
             if tmp_time - time > 0.1:
@@ -77,7 +77,6 @@ def get_burst(cap):
                 list_burst.append(list)
                 list = []
                 append_packet(list_up_packet, list_down_packet, list_bi_packet, packet)
-                print("time: " + str(time))
             #     append the existing burst
             else:
                 append_packet(list_up_packet, list_down_packet, list_bi_packet, packet)
@@ -104,10 +103,11 @@ def load_data(path):
         try:
             cap = pyshark.FileCapture(path + file)
             listburst = get_burst(cap)
+            get_data(listburst)
+            list_res.extend(listburst)
         except:
             print("not a file")
-        get_data(listburst)
-        list_res.extend(listburst)
+
     return list_res
 
 def get_feature(data):
@@ -118,28 +118,36 @@ def get_feature(data):
     return feature
 
 def add_label(data,label):
-    tmp = []
+    tmp = 0
     res = []
     if label == 'social':
-        tmp.append(1)
+        tmp = 0
     elif label == 'communication':
-        tmp.append(2)
+        tmp = 1
     else:
-        tmp.append(3)
+        tmp = 2
 
     for i in range(len(data)):
         res.append(tmp)
     return res
 
 def scalar(data):
+    #
     datapd = pd.DataFrame(data)
     data_norm = (datapd-datapd.mean())/datapd.std()
     return data_norm
 
 def main():
+    # try:
+    #     dataset = pd.read_csv('foo.csv').transpose
+    # except:
+
     list_social = load_data('social/')
+    print("social load finish")
     list_finance = load_data('finance/')
+    print("finance load finish")
     list_communication = load_data('communication/')
+    print("communication load finish")
 
     social_data = get_feature(list_social)
     social_data_norm = scalar(social_data)
@@ -154,7 +162,6 @@ def main():
     label_finance = add_label(finance_data_norm, 'finance')
     label_communication = add_label(communication_data_norm, 'communication')
 
-    print("Total length of ip is "+str(sum))
 
     # concatenate data
     labels = []
@@ -167,15 +174,17 @@ def main():
 
     frames = [social_data_norm, finance_data_norm, communication_data_norm]
     dataset = pd.concat(frames, ignore_index=True)
+    # dataset.to_csv("foo.csv")
     X = dataset
     labels = pd.DataFrame(labels)
+    # labels.to_csv("label.csv")
     Y = labels
 
     ############################## Split Dataset ##############################################
     logger.info('Start to split data set into train set, validation set and test set randomly')
 
     # Split X,Y to train and test
-    train_proportion = 0.5
+    train_proportion = 0.95
 
     def train_validate_test_split(X, Y, train_percent):
         totLen = len(X)
@@ -239,9 +248,6 @@ def main():
     # Gaussian Naive Bayes
     gnb = GaussianNB()
 
-    # Logistic Regression
-    lr = LogisticRegression(C=10, solver='sag', tol=0.1)
-
     # Random Forest Classifier
     rfc = RandomForestClassifier(max_depth=15, n_estimators=10)
 
@@ -249,12 +255,11 @@ def main():
     AdaDT = AdaBoostClassifier(DecisionTreeClassifier(max_depth=8), n_estimators=10, learning_rate=0.5)
 
     # Bagging classifier
-    bagging_lr = BaggingClassifier(LogisticRegression(C=10, solver='sag', tol=0.1))
+    bagging_lr = BaggingClassifier(GaussianNB())
 
     # Result
     results = []
     for clf, name in ((gnb, 'Gaussian Naive Bayes'),
-                      (lr, 'Logistic Regression'),
                       (rfc, 'Random Forest'),
                       (AdaDT, 'Adaboosting classifier'),
                       # (svc, 'SVM  classifier'),
