@@ -1,6 +1,7 @@
 import copy
 import os
 import pyshark
+import pandas as pd
 from test import changetovector
 
 from Packet import Packet
@@ -92,20 +93,26 @@ def load_data(path):
         list_res.extend(listburst)
     return list_res
 
-def get_labeled_feature(data, label):
+def get_labeled_feature(data):
     feature = []
     for tmp_res in data:
         tmp = changetovector(tmp_res)
-        tmp.append(label)
+        # tmp.append(label)
         feature.append(tmp)
     return feature
+
+def scalar(data):
+    datapd = pd.DataFrame(data)
+    data_norm = (datapd-datapd.mean())/datapd.std()
+    return data_norm
 
 def main():
     list_social = load_data('social/')
     # list_finance = load_data('finance')
     # list_communication = load_data('communication')
 
-    social_data = get_labeled_feature(list_social,'social')
+    social_data = get_labeled_feature(list_social)
+    social_data_norm = scalar(social_data)
 
     print("Total length of ip is "+str(sum))
 
