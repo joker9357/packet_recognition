@@ -93,13 +93,26 @@ def load_data(path):
         list_res.extend(listburst)
     return list_res
 
-def get_labeled_feature(data):
+def get_feature(data):
     feature = []
     for tmp_res in data:
         tmp = changetovector(tmp_res)
-        # tmp.append(label)
         feature.append(tmp)
     return feature
+
+def add_label(data,label):
+    tmp = []
+    res = []
+    if label == 'social':
+        tmp.append(1)
+    elif label == 'communication':
+        tmp.append(2)
+    else:
+        tmp.append(3)
+
+    for i in range(len(data)):
+        res.append(tmp)
+    return res
 
 def scalar(data):
     datapd = pd.DataFrame(data)
@@ -111,9 +124,10 @@ def main():
     # list_finance = load_data('finance')
     # list_communication = load_data('communication')
 
-    social_data = get_labeled_feature(list_social)
+    social_data = get_feature(list_social)
     social_data_norm = scalar(social_data)
 
+    label = add_label(social_data_norm,'social')
     print("Total length of ip is "+str(sum))
 
 
